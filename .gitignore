@@ -1,6 +1,7 @@
-__pycache__/ 
-*.pyc 
-.venv/ 
-.env 
-data/ 
-*.log 
+__pycache__/
+*.pyc
+.venv/
+.env
+*.log
+data/synthetic/patients.json
+data/synthetic/events.json

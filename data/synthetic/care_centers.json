@@ -1,0 +1,82 @@
+[
+  {
+    "center_id": "C-001",
+    "name": "Institut National d'Oncologie Sidi Mohamed Ben Abdellah",
+    "city": "Rabat",
+    "latitude": 34.0084,
+    "longitude": -6.8390,
+    "services": ["oncologie", "radiotherapie", "chirurgie"]
+  },
+  {
+    "center_id": "C-002",
+    "name": "CHU Ibn Rochd - Service Oncologie",
+    "city": "Casablanca",
+    "latitude": 33.5945,
+    "longitude": -7.6114,
+    "services": ["oncologie", "chirurgie", "laboratoire"]
+  },
+  {
+    "center_id": "C-003",
+    "name": "Casablanca Cancer Center - Hopital Cheikh Khalifa",
+    "city": "Casablanca",
+    "latitude": 33.5731,
+    "longitude": -7.6298,
+    "services": ["oncologie", "radiotherapie", "chirurgie", "laboratoire"]
+  },
+  {
+    "center_id": "C-004",
+    "name": "Centre d'Oncologie Hassan II - CHU Mohammed VI",
+    "city": "Oujda",
+    "latitude": 34.6814,
+    "longitude": -1.9086,
+    "services": ["oncologie", "radiotherapie"]
+  },
+  {
+    "center_id": "C-005",
+    "name": "CHU Hassan II - Oncologie",
+    "city": "Fes",
+    "latitude": 34.0331,
+    "longitude": -5.0003,
+    "services": ["oncologie", "chirurgie", "laboratoire"]
+  },
+  {
+    "center_id": "C-006",
+    "name": "Centre International d'Oncologie les Deux Rives",
+    "city": "Sale",
+    "latitude": 34.0531,
+    "longitude": -6.7985,
+    "services": ["oncologie", "radiotherapie"]
+  },
+  {
+    "center_id": "C-007",
+    "name": "Centre International d'Oncologie Casablanca",
+    "city": "Casablanca",
+    "latitude": 33.5228,
+    "longitude": -7.6592,
+    "services": ["oncologie", "chirurgie", "soins_palliatifs"]
+  },
+  {
+    "center_id": "C-008",
+    "name": "Hopital International d'Agadir - Oncologie",
+    "city": "Agadir",
+    "latitude": 30.4278,
+    "longitude": -9.5981,
+    "services": ["oncologie", "laboratoire"]
+  },
+  {
+    "center_id": "C-009",
+    "name": "Hopital Militaire d'Instruction Mohammed V - Oncologie",
+    "city": "Rabat",
+    "latitude": 34.0209,
+    "longitude": -6.8417,
+    "services": ["oncologie", "chirurgie", "hospitalization"]
+  },
+  {
+    "center_id": "C-010",
+    "name": "Polyclinique Internationale Laayoune",
+    "city": "Laayoune",
+    "latitude": 27.1418,
+    "longitude": -13.1913,
+    "services": ["oncologie", "laboratoire"]
+  }
+]
