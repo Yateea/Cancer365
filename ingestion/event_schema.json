@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CancerCare360 Event Schema",
+  "type": "object",
+  "required": ["event_id", "patient_id", "event_type", "event_timestamp", "service", "status", "source_system"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Identifiant unique de l'evenement (UUID)"
+    },
+    "patient_id": {
+      "type": "string",
+      "description": "Identifiant pseudonymise du patient, ex: P-82931"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": ["appointment", "lab_result", "treatment", "hospitalization", "discharge", "followup"]
+    },
+    "event_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Horodatage ISO-8601"
+    },
+    "service": {
+      "type": "string",
+      "enum": ["oncologie", "radiotherapie", "laboratoire", "chirurgie", "soins_palliatifs"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["scheduled", "completed", "missed", "cancelled"]
+    },
+    "source_system": {
+      "type": "string",
+      "enum": ["hospital_api", "patient_app", "lab_csv"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Attributs specifiques au type d'evenement"
+    }
+  }
+}
