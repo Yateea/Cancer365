@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: >
+      Couche Bronze du lakehouse : evenements bruts tels qu'ecrits par le
+      consommateur Kafka, sans transformation, au format Parquet.
+    tables:
+      - name: events
+        description: "Evenements de parcours patient (rendez-vous, resultats labo, traitements...)"
+        meta:
+          external_location: "s3://cancercare-lakehouse/bronze/events/*.parquet"

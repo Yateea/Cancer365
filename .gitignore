@@ -4,4 +4,5 @@ __pycache__/
 .env
 *.log
 data/synthetic/patients.json
-data/synthetic/events.json
+data/synthetic/events.jsonlakehouse/dbt/profiles.yml 
+cancercare.duckdb 
