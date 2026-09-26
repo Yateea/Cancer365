@@ -1,1 +1,0 @@
-{"_invocation_id": "e982eebe-1454-4aaf-8e72-bcc555d85da8", "linked": {"0": {"name": "source.cancercare360.bronze.events", "type": "source", "succ": [1]}, "1": {"name": "model.cancercare360.stg_events", "type": "model"}}}
