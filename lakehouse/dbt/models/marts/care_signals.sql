@@ -63,7 +63,7 @@ signals as (
         -- RF-08 : jamais presente comme un diagnostic, toujours soumis a revue humaine
         true as requires_human_review,
 
-        current_timestamp as generated_at
+        cast(current_timestamp as timestamp) as generated_at
 
     from evaluated
     where no_future_appointment
