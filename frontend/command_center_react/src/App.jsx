@@ -12,13 +12,43 @@ function KpiCard({ label, value }) {
   )
 }
 
-function SignalCard({ signal, missedCount }) {
+function SignalCard({ signal, onReviewed }) {
   const [expanded, setExpanded] = useState(false)
+  const [comment, setComment] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [validationError, setValidationError] = useState('')
+
+  const isClosed = signal.status === 'closed'
+
+  async function handleSubmit() {
+    if (!comment.trim()) {
+      setValidationError('Un commentaire est obligatoire pour cloturer un signal.')
+      return
+    }
+    setValidationError('')
+    setSubmitting(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/signals/${signal.patient_id}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.detail || 'Erreur lors de la cloture du signal.')
+      }
+      await onReviewed()
+    } catch (err) {
+      setValidationError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="signal-card">
       <button className="signal-card-header" onClick={() => setExpanded(!expanded)}>
-        <span className="status-dot" />
+        <span className={`status-dot ${isClosed ? 'status-dot-closed' : ''}`} />
         <span className="signal-patient">{signal.patient_id}</span>
         <span className="signal-meta">Dernier contact : {signal.last_event_date}</span>
         <span className="chevron">{expanded ? '▾' : '▸'}</span>
@@ -32,12 +62,30 @@ function SignalCard({ signal, missedCount }) {
               <li key={i}>{factor}</li>
             ))}
           </ul>
-          <p className="review-notice">
-            ⓘ Ce signal necessite une revue humaine avant toute action.
-          </p>
-          <button className="btn-review" disabled>
-            Marquer comme revu (a venir)
-          </button>
+
+          {isClosed ? (
+            <div className="review-done">
+              <p><strong>Signal cloture</strong> le {signal.reviewed_at}</p>
+              <p className="review-comment">"{signal.comment}"</p>
+            </div>
+          ) : (
+            <>
+              <p className="review-notice">
+                ⓘ Ce signal necessite une revue humaine avant toute action.
+              </p>
+              <textarea
+                className="review-textarea"
+                placeholder="Commentaire de revue (obligatoire)..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={3}
+              />
+              {validationError && <p className="validation-error">{validationError}</p>}
+              <button className="btn-review" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? 'Enregistrement...' : 'Marquer comme revu'}
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -51,6 +99,12 @@ export default function App() {
   const [minMissed, setMinMissed] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  function fetchSignals() {
+    return fetch(`${API_BASE}/api/signals`)
+      .then((r) => r.json())
+      .then((data) => setSignals(data))
+  }
 
   useEffect(() => {
     Promise.all([
@@ -145,7 +199,7 @@ export default function App() {
           <p className="empty-state">Aucun signal ne correspond aux filtres selectionnes.</p>
         )}
         {filtered.map((s) => (
-          <SignalCard key={s.patient_id} signal={s} missedCount={missedByPatient[s.patient_id]} />
+          <SignalCard key={s.patient_id} signal={s} onReviewed={fetchSignals} />
         ))}
       </section>
     </div>

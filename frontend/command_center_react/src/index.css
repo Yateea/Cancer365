@@ -151,6 +151,42 @@ body {
   flex-shrink: 0;
 }
 
+.status-dot-closed {
+  background: var(--color-green);
+}
+
+.review-textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.validation-error {
+  color: #B91C1C;
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.review-done {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 12px 0;
+  font-size: 13px;
+  color: #14532D;
+}
+
+.review-comment {
+  font-style: italic;
+  margin: 4px 0 0;
+}
+
 .signal-patient {
   font-weight: 600;
   color: var(--color-primary);
@@ -203,6 +239,14 @@ body {
   padding: 8px 16px;
   font-size: 13px;
   font-family: inherit;
-  cursor: not-allowed;
+  cursor: pointer;
+}
+
+.btn-review:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-review:hover:not(:disabled) {
+  filter: brightness(0.92);
 }
