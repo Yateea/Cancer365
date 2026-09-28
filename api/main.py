@@ -30,13 +30,18 @@ POSTGRES_URI = "postgresql+psycopg2://airflow:airflow@127.0.0.1:5434/airflow"
 WAREHOUSE_LOCATION = "s3://cancercare-lakehouse/iceberg_warehouse"
 NAMESPACE = "gold"
 REVIEWS_TABLE = f"{NAMESPACE}.signal_reviews"
+NOTES_TABLE = f"{NAMESPACE}.patient_notes"
 
 app = FastAPI(title="CancerCare360 API")
 
 # Autorise le frontend React (servi par Vite sur le port 5173) a appeler cette API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173", "http://127.0.0.1:5173",  # Care Command Center
+        "http://localhost:5174", "http://127.0.0.1:5174",  # Patient Companion
+        "http://localhost:5175", "http://127.0.0.1:5175",  # Patient Companion (port de secours)
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -88,6 +93,10 @@ class ReviewRequest(BaseModel):
     comment: str
 
 
+class NoteRequest(BaseModel):
+    text: str
+
+
 def clean(obj):
     """Convertit recursivement les types numpy/pandas en types Python natifs
     (int64, float64, ndarray...), sinon FastAPI echoue a serialiser le JSON."""
@@ -118,7 +127,77 @@ def get_patients():
     return clean(df.to_dict(orient="records"))
 
 
-@app.get("/api/signals")
+@app.get("/api/patient-ids")
+def get_patient_ids():
+    """Liste des patients disponibles (pas d'authentification dans ce prototype :
+    l'utilisateur choisit un patient a consulter, comme sur un poste partage)."""
+    con = get_connection()
+    df = con.execute(
+        "SELECT patient_id FROM main_gold.patient_summary ORDER BY patient_id"
+    ).fetchdf()
+    return clean(df["patient_id"].tolist())
+
+
+@app.get("/api/patient/{patient_id}/journey")
+def get_patient_journey(patient_id: str):
+    """Chronologie complete des evenements d'un patient (template T1)."""
+    con = get_connection()
+    df = con.execute(
+        """
+        SELECT event_id, event_type, event_timestamp, service, status, center_name
+        FROM main_silver.stg_events
+        WHERE patient_id = ?
+        ORDER BY event_timestamp ASC
+        """,
+        [patient_id],
+    ).fetchdf()
+    if "event_timestamp" in df.columns:
+        df["event_timestamp"] = df["event_timestamp"].astype(str)
+    return clean(df.to_dict(orient="records"))
+
+
+@app.get("/api/patient/{patient_id}/notes")
+def get_patient_notes(patient_id: str):
+    """Carnet de questions du patient (RF-16) : notes libres, jamais interpretees."""
+    catalog = get_iceberg_catalog()
+    try:
+        table = catalog.load_table(NOTES_TABLE)
+        df = table.scan().to_arrow().to_pandas()
+    except NoSuchTableError:
+        return []
+
+    df = df[df["patient_id"] == patient_id].sort_values("created_at", ascending=False)
+    return clean(df.to_dict(orient="records"))
+
+
+@app.post("/api/patient/{patient_id}/notes")
+def add_patient_note(patient_id: str, note: NoteRequest):
+    """RF-16 : le patient ajoute une note libre (question, symptome a discuter).
+    Aucune interpretation automatique n'est faite de ce contenu."""
+    text = note.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="La note ne peut pas etre vide.")
+
+    created_at = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+
+    row = pa.table({
+        "patient_id": [patient_id],
+        "text": [text],
+        "created_at": [created_at],
+    })
+
+    catalog = get_iceberg_catalog()
+    try:
+        table = catalog.load_table(NOTES_TABLE)
+        table.append(row)
+    except NoSuchTableError:
+        table = catalog.create_table(NOTES_TABLE, schema=row.schema)
+        table.append(row)
+
+    return {"status": "saved", "patient_id": patient_id, "created_at": created_at}
+
+
+
 def get_signals():
     con = get_connection()
     df = con.execute("SELECT * FROM main_gold.care_signals").fetchdf()

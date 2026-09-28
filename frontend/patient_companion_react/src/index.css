@@ -1,0 +1,231 @@
+:root {
+  --color-primary: #0B3D5C;
+  --color-secondary: #17A398;
+  --color-bg: #F7FAFA;
+  --color-text: #1F2937;
+  --color-amber: #F59E0B;
+  --color-green: #22A06B;
+  --color-border: #D1D9E0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.center-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.companion-app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.patient-switcher {
+  text-align: right;
+  font-size: 12px;
+  color: #6B7280;
+  margin-bottom: 24px;
+}
+.patient-switcher select {
+  margin-left: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+
+.companion-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.companion-header h1 {
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.companion-sub {
+  color: var(--color-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Prochain rendez-vous */
+.next-appointment-card {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 40px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.next-label {
+  color: #6B7280;
+  font-size: 13px;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.next-date {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-secondary);
+  margin: 0;
+}
+.next-meta {
+  color: #6B7280;
+  margin: 4px 0 0;
+}
+.next-empty {
+  color: #6B7280;
+  margin: 0;
+}
+
+/* Timeline */
+.timeline-section h2,
+.notes-card h2 {
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 24px;
+  border-left: 2px solid var(--color-border);
+}
+
+.timeline-step {
+  position: relative;
+  padding-bottom: 28px;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -30px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  border: 2px solid white;
+}
+
+.status-missed .timeline-dot {
+  background: var(--color-amber);
+}
+.status-cancelled .timeline-dot {
+  background: #9CA3AF;
+}
+
+.timeline-date {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 0;
+}
+.timeline-title {
+  font-weight: 600;
+  margin: 2px 0;
+}
+.timeline-meta {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 6px;
+}
+
+.timeline-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #E5F6F3;
+  color: var(--color-secondary);
+}
+.badge-missed {
+  background: #FEF3C7;
+  color: #92400E;
+}
+.badge-cancelled {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+/* Carnet de questions */
+.notes-card {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 40px;
+}
+
+.notes-hint {
+  font-size: 13px;
+  color: #6B7280;
+  margin-bottom: 16px;
+}
+
+.notes-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.notes-input-row textarea {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.notes-input-row button {
+  align-self: flex-end;
+  background: var(--color-secondary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.notes-input-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.notes-list li {
+  border-top: 1px solid var(--color-border);
+  padding: 12px 0;
+}
+.note-date {
+  font-size: 11px;
+  color: #9CA3AF;
+}
+.notes-list li p {
+  margin: 4px 0 0;
+}
+.notes-empty {
+  color: #9CA3AF;
+  font-style: italic;
+  font-size: 13px;
+}
