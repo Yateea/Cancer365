@@ -10,6 +10,11 @@ Usage:
     uvicorn api.main:app --reload --port 8000
 """
 
+import hashlib
+import json
+import math
+from pathlib import Path
+
 import duckdb
 import numpy as np
 import pandas as pd
@@ -20,6 +25,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NoSuchTableError
+
+CENTERS_FILE = Path(__file__).parent.parent / "data" / "synthetic" / "care_centers.json"
+
+with open(CENTERS_FILE, "r", encoding="utf-8") as f:
+    CARE_CENTERS = json.load(f)
 
 DUCKDB_FILE = "cancercare.duckdb"
 MINIO_ENDPOINT = "localhost:9000"
@@ -59,6 +69,84 @@ def get_connection():
     con.execute("SET s3_url_style='path'")
     con.execute("SET s3_region='us-east-1'")
     return con
+
+
+def haversine_km(lat1, lon1, lat2, lon2):
+    """Distance a vol d'oiseau entre deux points GPS (formule de haversine)."""
+    R = 6371  # rayon de la Terre en km
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(a))
+
+
+def get_approx_home_location(patient_id: str, center_lat: float, center_lon: float):
+    """
+    Approxime la position du domicile du patient par un leger decalage
+    deterministe autour de son centre principal (0 a environ 60 km).
+
+    Aucune adresse reelle n'est collectee ni stockee (minimisation des
+    donnees, section 14 du cahier des charges) : ce decalage est calcule
+    a la volee a partir d'un hash de l'identifiant pseudonymise, uniquement
+    a des fins de demonstration de la cartographie d'accessibilite.
+    """
+    digest = hashlib.sha256(patient_id.encode()).hexdigest()
+    # Deux nombres pseudo-aleatoires stables, dans [-1, 1]
+    offset_lat = (int(digest[:8], 16) / 0xFFFFFFFF) * 2 - 1
+    offset_lon = (int(digest[8:16], 16) / 0xFFFFFFFF) * 2 - 1
+    # ~0.5 degre max (~50-60km au Maroc), reparti sur lat/lon
+    return center_lat + offset_lat * 0.5, center_lon + offset_lon * 0.5
+
+
+def compute_accessibility(patient_id: str, primary_center_id: str):
+    primary_center = next((c for c in CARE_CENTERS if c["center_id"] == primary_center_id), None)
+    if primary_center is None:
+        return None
+
+    home_lat, home_lon = get_approx_home_location(
+        patient_id, primary_center["latitude"], primary_center["longitude"]
+    )
+
+    distances = []
+    for center in CARE_CENTERS:
+        d = haversine_km(home_lat, home_lon, center["latitude"], center["longitude"])
+        distances.append((d, center))
+    distances.sort(key=lambda x: x[0])
+
+    nearest_distance, nearest_center = distances[0]
+    primary_distance = next(d for d, c in distances if c["center_id"] == primary_center_id)
+
+    avg_speed_kmh = 50  # hypothese simple pour l'estimation du temps de trajet
+    travel_time_min = round((primary_distance / avg_speed_kmh) * 60)
+
+    accessibility_score = max(0, round(100 - 2 * primary_distance))
+
+    return {
+        "patient_id": patient_id,
+        "home_latitude": round(home_lat, 5),
+        "home_longitude": round(home_lon, 5),
+        "primary_center": {
+            "center_id": primary_center["center_id"],
+            "name": primary_center["name"],
+            "city": primary_center["city"],
+            "latitude": primary_center["latitude"],
+            "longitude": primary_center["longitude"],
+            "distance_km": round(primary_distance, 1),
+        },
+        "nearest_center": {
+            "center_id": nearest_center["center_id"],
+            "name": nearest_center["name"],
+            "city": nearest_center["city"],
+            "latitude": nearest_center["latitude"],
+            "longitude": nearest_center["longitude"],
+            "distance_km": round(nearest_distance, 1),
+        },
+        "travel_time_min": travel_time_min,
+        "accessibility_score": accessibility_score,
+        "uses_nearest_center": nearest_center["center_id"] == primary_center_id,
+    }
+
 
 
 def get_iceberg_catalog():
@@ -125,6 +213,53 @@ def get_patients():
     if "last_event_date" in df.columns:
         df["last_event_date"] = df["last_event_date"].astype(str)
     return clean(df.to_dict(orient="records"))
+
+
+@app.get("/api/centers")
+def get_centers():
+    """Liste des centres de soin avec un taux de fiabilite approxime
+    (RF-10) : proportion des rendez-vous non manques/annules sur ce centre."""
+    con = get_connection()
+    df = con.execute(
+        """
+        SELECT center_name,
+               COUNT(*) FILTER (WHERE event_type = 'appointment') as total_appointments,
+               COUNT(*) FILTER (WHERE event_type = 'appointment' AND status = 'completed') as completed
+        FROM main_silver.stg_events
+        GROUP BY center_name
+        """
+    ).fetchdf()
+    reliability = {
+        row["center_name"]: (
+            round(100 * row["completed"] / row["total_appointments"])
+            if row["total_appointments"] else None
+        )
+        for _, row in df.iterrows()
+    }
+
+    centers = []
+    for c in CARE_CENTERS:
+        centers.append({
+            **c,
+            "reliability_pct": reliability.get(c["name"]),
+        })
+    return clean(centers)
+
+
+@app.get("/api/patient/{patient_id}/accessibility")
+def get_patient_accessibility(patient_id: str):
+    con = get_connection()
+    df = con.execute(
+        "SELECT primary_center_id FROM main_silver.stg_patients WHERE patient_id = ?",
+        [patient_id],
+    ).fetchdf()
+    if df.empty:
+        raise HTTPException(status_code=404, detail="Patient introuvable.")
+
+    result = compute_accessibility(patient_id, df.iloc[0]["primary_center_id"])
+    if result is None:
+        raise HTTPException(status_code=404, detail="Centre principal introuvable.")
+    return clean(result)
 
 
 @app.get("/api/patient-ids")
@@ -197,7 +332,7 @@ def add_patient_note(patient_id: str, note: NoteRequest):
     return {"status": "saved", "patient_id": patient_id, "created_at": created_at}
 
 
-
+@app.get("/api/signals")
 def get_signals():
     con = get_connection()
     df = con.execute("SELECT * FROM main_gold.care_signals").fetchdf()

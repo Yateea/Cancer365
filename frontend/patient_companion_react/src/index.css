@@ -229,3 +229,50 @@ body {
   font-style: italic;
   font-size: 13px;
 }
+
+/* Accessibilite */
+.accessibility-card {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.accessibility-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.accessibility-stats > div {
+  text-align: center;
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 12px 8px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.stat-label {
+  display: block;
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 2px;
+}
+
+.accessibility-hint {
+  font-size: 13px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 16px;
+}

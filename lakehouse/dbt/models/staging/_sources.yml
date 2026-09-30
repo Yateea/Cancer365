@@ -10,3 +10,7 @@ sources:
         description: "Evenements de parcours patient (rendez-vous, resultats labo, traitements...)"
         meta:
           external_location: "s3://cancercare-lakehouse/bronze/events/*.parquet"
+      - name: patients
+        description: "Donnees de reference patient (ville, centre principal, type de cancer)"
+        meta:
+          external_location: "s3://cancercare-lakehouse/bronze/patients/patients.parquet"

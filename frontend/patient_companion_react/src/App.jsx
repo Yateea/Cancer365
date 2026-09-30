@@ -1,7 +1,83 @@
 import { useEffect, useState } from 'react'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import './index.css'
 
 const API_BASE = 'http://127.0.0.1:8000'
+
+// Icones par defaut Leaflet (contournement d'un bug connu avec les bundlers)
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+})
+
+function AccessibilitySection({ patientId }) {
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    if (!patientId) return
+    fetch(`${API_BASE}/api/patient/${patientId}/accessibility`)
+      .then((r) => r.json())
+      .then(setData)
+  }, [patientId])
+
+  if (!data || !data.primary_center) return null
+
+  const center = [data.home_latitude, data.home_longitude]
+
+  return (
+    <div className="accessibility-card">
+      <h2>Accessibilite aux soins</h2>
+      <p className="notes-hint">
+        Position approximative estimee a des fins de demonstration (aucune
+        adresse reelle n'est collectee).
+      </p>
+
+      <div className="accessibility-stats">
+        <div>
+          <span className="stat-value">{data.primary_center.distance_km} km</span>
+          <span className="stat-label">Distance jusqu'a mon centre</span>
+        </div>
+        <div>
+          <span className="stat-value">{data.travel_time_min} min</span>
+          <span className="stat-label">Temps de trajet estime</span>
+        </div>
+        <div>
+          <span className="stat-value">{data.accessibility_score}/100</span>
+          <span className="stat-label">Score d'accessibilite</span>
+        </div>
+      </div>
+
+      {!data.uses_nearest_center && (
+        <p className="accessibility-hint">
+          ⓘ Un centre plus proche existe : {data.nearest_center.name} a{' '}
+          {data.nearest_center.distance_km} km.
+        </p>
+      )}
+
+      <MapContainer center={center} zoom={9} style={{ height: '280px', borderRadius: '8px' }}>
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={center}>
+          <Popup>Domicile (approximatif)</Popup>
+        </Marker>
+        <Marker position={[data.primary_center.latitude, data.primary_center.longitude]}>
+          <Popup>{data.primary_center.name} (mon centre)</Popup>
+        </Marker>
+        {!data.uses_nearest_center && (
+          <Marker position={[data.nearest_center.latitude, data.nearest_center.longitude]}>
+            <Popup>{data.nearest_center.name} (plus proche)</Popup>
+          </Marker>
+        )}
+      </MapContainer>
+    </div>
+  )
+}
 
 const EVENT_LABELS = {
   appointment: 'Rendez-vous',
@@ -180,6 +256,8 @@ export default function App() {
       </section>
 
       <NotesBook patientId={selectedPatient} />
+
+      <AccessibilitySection patientId={selectedPatient} />
     </div>
   )
 }
