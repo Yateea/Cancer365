@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/user/cancercare360/mlruns/648894748179996950/c6801a28899c402990c903224c4c3c16/artifacts
+end_time: 1790885073489
+entry_point_name: ''
+experiment_id: '648894748179996950'
+lifecycle_stage: active
+run_id: c6801a28899c402990c903224c4c3c16
+run_name: funny-snake-996
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1790885063296
+status: 3
+tags: []
+user_id: user

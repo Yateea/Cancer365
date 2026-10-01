@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/user/cancercare360/mlruns/648894748179996950/a9c8b09591794ef08798d416769e0a39/artifacts
+end_time: 1790885013476
+entry_point_name: ''
+experiment_id: '648894748179996950'
+lifecycle_stage: active
+run_id: a9c8b09591794ef08798d416769e0a39
+run_name: welcoming-foal-506
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1790884983992
+status: 3
+tags: []
+user_id: user
