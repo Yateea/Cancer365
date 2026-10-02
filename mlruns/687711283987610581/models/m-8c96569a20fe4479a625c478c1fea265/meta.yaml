@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/user/cancercare360/mlruns/687711283987610581/models/m-8c96569a20fe4479a625c478c1fea265/artifacts
+creation_timestamp: 1790886563249
+experiment_id: '687711283987610581'
+last_updated_timestamp: 1790886573515
+model_id: m-8c96569a20fe4479a625c478c1fea265
+model_type: null
+name: model
+source_run_id: 77afb19ea485422aa7faf184753e2494
+status: 2
+status_message: null

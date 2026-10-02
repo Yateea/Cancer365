@@ -11,3 +11,5 @@ lakehouse/dbt/dbt_packages/
 lakehouse/dbt/logs/
 lakehouse/dbt/.user.yml
 cancercare.duckdb
+.pytest_cache/
+schemas.txt

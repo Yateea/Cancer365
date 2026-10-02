@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/user/cancercare360/mlruns/687711283987610581/77afb19ea485422aa7faf184753e2494/artifacts
+end_time: 1790886573757
+entry_point_name: ''
+experiment_id: '687711283987610581'
+lifecycle_stage: active
+run_id: 77afb19ea485422aa7faf184753e2494
+run_name: bald-chimp-31
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1790886562535
+status: 3
+tags: []
+user_id: user

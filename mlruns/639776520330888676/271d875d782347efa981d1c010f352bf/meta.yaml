@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/user/cancercare360/mlruns/639776520330888676/271d875d782347efa981d1c010f352bf/artifacts
+end_time: 1790885660350
+entry_point_name: ''
+experiment_id: '639776520330888676'
+lifecycle_stage: active
+run_id: 271d875d782347efa981d1c010f352bf
+run_name: fearless-roo-1
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1790885650103
+status: 3
+tags: []
+user_id: user
