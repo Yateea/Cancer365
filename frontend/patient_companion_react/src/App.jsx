@@ -173,6 +173,32 @@ function NotesBook({ patientId }) {
   )
 }
 
+function NavigatorSummary({ patientId }) {
+  const [summary, setSummary] = useState(null)
+
+  useEffect(() => {
+    if (!patientId) return
+    fetch(`${API_BASE}/api/patient/${patientId}/weekly-summary`)
+      .then((r) => r.json())
+      .then(setSummary)
+      .catch(() => setSummary(null))
+  }, [patientId])
+
+  if (!summary) return null
+
+  return (
+    <div className="navigator-card">
+      <h2>🧭 Resume de la semaine</h2>
+      <ul className="navigator-sentences">
+        {summary.summary_sentences.map((s, i) => (
+          <li key={i}>{s}</li>
+        ))}
+      </ul>
+      <p className="navigator-disclaimer">{summary.disclaimer}</p>
+    </div>
+  )
+}
+
 export default function App() {
   const [patientIds, setPatientIds] = useState([])
   const [selectedPatient, setSelectedPatient] = useState(null)
@@ -245,6 +271,8 @@ export default function App() {
           <p className="next-empty">Aucun rendez-vous a venir n'est planifie pour le moment.</p>
         )}
       </section>
+
+      <NavigatorSummary patientId={selectedPatient} />
 
       <section className="timeline-section">
         <h2>Mes etapes</h2>
